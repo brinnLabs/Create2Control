@@ -16,12 +16,11 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
 
 
 
@@ -31,25 +30,194 @@ import struct
 import os
 import warnings
 import time
+from enum import IntEnum
 
+class PacketType(IntEnum):
+    GROUP_0 = 0
+    GROUP_1 = 1
+    GROUP_2 = 2
+    GROUP_3 = 3
+    GROUP_4 = 4
+    GROUP_5 = 5
+    GROUP_6 = 6
+    ROOMBA_STATUS = 3 #battery levels and internal temperature reading
+    EXTENDED_ANALOG_READINGS = 4 #Cliff and wall sensors 
+    WHEEL_DROP_BUMPER = 7
+    WALL = 8
+    CLIFF_LEFT = 9
+    CLIFF_FRONT_LEFT = 10
+    CLIFF_FRONT_RIGHT = 11
+    CLIFF_RIGHT = 12
+    VIRTUAL_WALL = 13
+    WHEEL_OVERCURRENT = 14
+    DIRT = 15
+    OMNI_INFARED_CHAR = 17
+    BUTTONS = 18
+    DISTANCE = 19
+    ANGLE = 20
+    CHARGE_STATE = 21
+    VOLTAGE = 22
+    CURRENT = 23
+    TEMP = 24
+    BATTERY_CHARGE = 25
+    BATTERY_CAP = 26
+    WALL_ANALOG = 27
+    CLIFF_LEFT_ANALOG = 28
+    CLIFF_FRONT_LEFT_ANALOG = 29
+    CLIFF_FRONT_RIGHT_ANALOG = 30
+    CLIFF_RIGHT_ANALOG = 31
+    CHARGE_SOURCES = 34
+    OI_MODE = 35
+    SONG_NUMBER = 36
+    SONG_PLAYING = 37
+    NUM_STREAM_PKTS = 38
+    VELOCITY = 39
+    RADIUS = 40
+    RIGHT_WHEEL_VEL = 41
+    LEFT_WHEEL_VEL = 42
+    LEFT_ENCODER = 43
+    RIGHT_ENCODER = 44
+    LIGHT_BUMPER = 45
+    LIGHT_BUMPER_LEFT = 46
+    LIGHT_BUMPER_FRONT_LEFT = 47
+    LIGHT_BUMPER_CENTER_LEFT = 48
+    LIGHT_BUMPER_CENTER_RIGHT = 49
+    LIGHT_BUMPER_FRONT_RIGHT = 50
+    LIGHT_BUMPER_RIGHT = 51
+    LEFT_INFARED_CHAR = 52
+    RIGHT_INFARED_CHAR = 53
+    LEFT_MOTOR_CURRENT = 54
+    RIGHT_MOTOR_CURRENT = 55
+    MAIN_BRUSH_MOTOR = 56
+    SIDE_BRUSH_MOTOR = 57 
+    STASIS = 58
+    ALL = 100
+    GROUP_100 = 100
+    GROUP_101 = 101
+    GROUP_106 = 106
+    GROUP_107 = 107
+    BUMPER_SIGNALS = 106
+
+    def __str__(self):
+        if self == PacketType.WHEEL_DROP_BUMPER:
+            return 'wheel drop and bumps'
+        elif self == PacketType.WALL: 
+            return 'wall seen'
+        elif self == PacketType.CLIFF_LEFT: 
+            return 'cliff left'
+        elif self == PacketType.CLIFF_FRONT_LEFT: 
+            return 'cliff front left'
+        elif self == PacketType.CLIFF_FRONT_RIGHT: 
+            return 'cliff front right'
+        elif self == PacketType.CLIFF_RIGHT: 
+            return 'cliff right'
+        elif self == PacketType.VIRTUAL_WALL: 
+            return 'virtual wall'
+        elif self == PacketType.WHEEL_OVERCURRENT: 
+            return 'wheel overcurrents'
+        elif self == PacketType.DIRT: 
+            return 'dirt detect'
+        elif self == PacketType.OMNI_INFARED_CHAR: 
+            return 'infared char omni'
+        elif self == PacketType.BUTTONS: 
+            return 'buttons'
+        elif self == PacketType.DISTANCE: 
+            return 'distance'
+        elif self == PacketType.ANGLE: 
+            return 'angle'
+        elif self == PacketType.CHARGE_STATE: 
+            return 'charging state'
+        elif self == PacketType.VOLTAGE: 
+            return 'voltage'
+        elif self == PacketType.CURRENT: 
+            return 'current'
+        elif self == PacketType.TEMP: 
+            return 'temperature'
+        elif self == PacketType.BATTERY_CHARGE: 
+            return 'battery charge'
+        elif self == PacketType.BATTERY_CAP: 
+            return 'battery capacity'
+        elif self == PacketType.WALL_ANALOG: 
+            return 'wall signal'
+        elif self == PacketType.CLIFF_LEFT_ANALOG: 
+            return 'cliff left signal'
+        elif self == PacketType.CLIFF_FRONT_LEFT_ANALOG: 
+            return 'cliff front left signal'
+        elif self == PacketType.CLIFF_FRONT_RIGHT_ANALOG: 
+            return 'cliff front right signal'
+        elif self == PacketType.CLIFF_RIGHT_ANALOG: 
+            return 'cliff right signal'
+        elif self == PacketType.CHARGE_SOURCES: 
+            return 'charging sources available'
+        elif self == PacketType.OI_MODE: 
+            return 'oi mode'
+        elif self == PacketType.SONG_NUMBER: 
+            return 'song number'
+        elif self == PacketType.SONG_PLAYING: 
+            return 'song playing'
+        elif self == PacketType.NUM_STREAM_PKTS: 
+            return 'number of stream packets'
+        elif self == PacketType.VELOCITY: 
+            return 'requested velocity'
+        elif self == PacketType.RADIUS: 
+            return 'requested radius'
+        elif self == PacketType.RIGHT_WHEEL_VEL: 
+            return 'requested right velocity'
+        elif self == PacketType.LEFT_WHEEL_VEL: 
+            return 'requested left velocity'
+        elif self == PacketType.LEFT_ENCODER: 
+            return 'left encoder counts'
+        elif self == PacketType.RIGHT_ENCODER: 
+            return 'right encoder counts'
+        elif self == PacketType.LIGHT_BUMPER: 
+            return 'light bumper'
+        elif self == PacketType.LIGHT_BUMPER_LEFT: 
+            return 'light bump left signal'
+        elif self == PacketType.LIGHT_BUMPER_FRONT_LEFT: 
+            return 'light bump front left signal'
+        elif self == PacketType.LIGHT_BUMPER_CENTER_LEFT: 
+            return 'light bump center left signal'
+        elif self == PacketType.LIGHT_BUMPER_CENTER_RIGHT: 
+            return 'light bump center right signal'
+        elif self == PacketType.LIGHT_BUMPER_FRONT_RIGHT: 
+            return 'light bump front right signal'
+        elif self == PacketType.LIGHT_BUMPER_RIGHT: 
+            return 'light bump right signal'
+        elif self == PacketType.LEFT_INFARED_CHAR: 
+            return 'infared char left'
+        elif self == PacketType.RIGHT_INFARED_CHAR: 
+            return 'infared char right'
+        elif self == PacketType.LEFT_MOTOR_CURRENT: 
+            return 'left motor current'
+        elif self == PacketType.RIGHT_MOTOR_CURRENT: 
+            return 'right motor current'
+        elif self == PacketType.MAIN_BRUSH_MOTOR: 
+            return 'main brush motor current'
+        elif self == PacketType.SIDE_BRUSH_MOTOR: 
+            return 'side brush motor current' 
+        elif self == PacketType.STATIS: 
+            return 'stasis'
+        else:
+            return 'unknown value'
+            
 
 class Error(Exception):
     """Error"""
     pass
 
-def custom_format_warning(message, category, filename, lineno, file=None, line=None):
+def custom_format_warning(message, category, filename, lineno, file = None, line = None):
     return 'Line ' + str(lineno) + ': ' + str(message) + '\n'
     #return ' %s:%s: %s:%s' % (filename, lineno, category.__name__, message)
-    
+
 class ROIDataByteError(Error):
-    """Exception raised for errors in ROI data bytes.
+        """Exception raised for errors in ROI data bytes.
     
-        Attributes:
-            msg -- explanation of the error
-    """
+            Attributes:
+                msg -- explanation of the error
+        """
     
-    def __init__(self, msg):
-        self.msg = msg
+        def __init__(self, msg):
+            self.msg = msg
 
 class ROIFailedToSendError(Error):
     """Exception raised when an error in data bytes prevented a packet to be sent
@@ -90,12 +258,12 @@ class Config(object):
             with open(self.fname) as fileData:
                 try:
                     self.data = json.load(fileData)
-                    print 'Loaded config and opcodes'
-                except ValueError, e:
-                    print 'Could not load config'
+                    print('Loaded config and opcodes')
+                except ValueError as e:
+                    print('Could not load config')
         else:
             #couldn't find file
-            print "No config file found"
+            print("No config file found")
             raise ValueError('Could not find config')
     
     
@@ -107,26 +275,26 @@ class SerialCommandInterface(object):
     """
 
     def __init__(self):
-        com = '/dev/ttyUSB0'  #This should not be hard coded...
-        baud = 115200
-        
         self.ser = serial.Serial()
+    
+    def setup(self, com = '/dev/ttyUSB0', baud = 115200):
+        ''' reconfigure the serial to the passed in settings '''
         self.ser.port = com
         self.ser.baudrate = baud
-        print self.ser.name
+        print(self.ser.name)
         if self.ser.isOpen(): 
-            print "port was open"
+            print("port was open")
             self.ser.close()
         self.ser.open()
-        print "opened port"
-    
+        print("opened port")
+
     def send(self, opcode, data):
         #First thing to do is convert the opcode to a tuple.
         temp_opcode = (opcode,)
         bytes = None
         
         if data == None:
-            #Sometimes opcodes don't need data. Since we can't add
+            #Sometimes opcodes don't need data.  Since we can't add
             # a None type to a tuple, we have to make this check.
             bytes = temp_opcode
         else:
@@ -161,16 +329,16 @@ class SerialCommandInterface(object):
 class Create2(object):
     """The top level class for controlling a Create2.
         This is the only class that outside scripts should be interacting with.    
-    
     """
     
     def __init__(self):
         
         self.SCI = SerialCommandInterface()
+        self.SCI.setup()
         self.config = Config()
         self.config.load()
         self.decoder = sensorPacketDecoder(dict(self.config.data['sensor group packet lengths']))
-        self.sensor_state = dict(self.config.data['sensor data']) # Load a raw sensor dict. None of these values are correct.
+        self.sensor_state = dict(self.config.data['sensor data']) # Load a raw sensor dict.  None of these values are correct.
         self.sleep_timer = .5
         
     
@@ -178,11 +346,10 @@ class Create2(object):
         """Closes up serial ports and terminates connection to the Create2
         """
         self.SCI.Close()
-        print 'Disconnected'
-    
-    
-    """ START OF OPEN INTERFACE COMMANDS
-    """
+        print('Disconnected')
+
+    """ START OF OPEN INTERFACE COMMANDS"""
+
     def start(self):
         self.SCI.send(self.config.data['opcodes']['start'], None)
         
@@ -216,6 +383,22 @@ class Create2(object):
     def safe(self):
         """Puts the Create 2 into safe mode. Blocks for a short (<.5 sec) amount of time so the
             bot has time to change modes.
+
+            When you send a Safe command to the OI, Roomba enters into Safe mode. Safe mode gives you full
+            control of Roomba, with the exception of the following safety-related conditions:
+
+            * Detection of a cliff while moving forward (or moving backward with a small turning radius, less than
+            one robot radius).
+            * Detection of a wheel drop (on any wheel).
+            * Charger plugged in and powered.
+
+            Should one of the above safety-related conditions occur while the OI is in Safe mode, Roomba stops all
+            motors and reverts to the Passive mode.
+
+            If no commands are sent to the OI when in Safe mode, Roomba waits with all motors and LEDs off and
+            does not respond to button presses or other sensor input.
+
+            Note that charging terminates when you enter Safe Mode, and Roomba will not power save.
         """
         self.SCI.send(self.config.data['opcodes']['safe'], None)
         time.sleep(self.sleep_timer)
@@ -223,6 +406,16 @@ class Create2(object):
     def full(self):
         """Puts the Create 2 into full mode. Blocks for a short (<.5 sec) amount of time so the
             bot has time to change modes.
+
+            When you send a Full command to the OI, Roomba enters into Full mode. Full mode gives you complete
+            control over Roomba, all of its actuators, and all of the safety-related conditions that are restricted when
+            the OI is in Safe mode, as Full mode shuts off the cliff, wheel-drop and internal charger safety features.
+            To put the OI back into Safe mode, you must send the Safe command.
+
+            If no commands are sent to the OI when in Full mode, Roomba waits with all motors and LEDs off and
+            does not respond to button presses or other sensor input.
+
+            Note that charging terminates when you enter Full Mode, and Roomba will not power save.
         """
         self.SCI.send(self.config.data['opcodes']['full'], None)
         time.sleep(self.sleep_timer)
@@ -259,15 +452,13 @@ class Create2(object):
         noError = True
         day = day.lower()
         
-        day_dict = dict(
-            sunday = 0,
+        day_dict = dict(sunday = 0,
             monday = 1,
             tuesday = 2,
             wednesday = 3,
             thursday = 4,
             friday = 5,
-            saturday = 6
-            )
+            saturday = 6)
         
         if day in day_dict:
             data[0] = day_dict[day]
@@ -298,6 +489,8 @@ class Create2(object):
             Args:
                 velocity: A number between -500 and 500. Units are mm/s. 
                 radius: A number between -2000 and 2000. Units are mm.
+                        The longer radii make Roomba drive straighter, while the shorter radii make Roomba turn more. The radius is
+                        measured from the center of the turning circle to the center of Roomba.
                     Drive straight: 32767
                     Turn in place clockwise: -1
                     Turn in place counterclockwise: 1
@@ -439,12 +632,12 @@ class Create2(object):
             raise ROIDataByteError("Invalid ASCII input (Must be EXACTLY four characters)")
         if noError:
             #Need to map ascii to numbers from the dict.
-            for i in range (0,4):
+            for i in range(0,4):
                 #Check that the character is in the list, if it is, add it.
                 if display_string[i] in self.config.data['ascii table']:
                     display_list.append(self.config.data['ascii table'][display_string[i]])
                 else:
-                    # Char was not available. Just print a blank space
+                    # Char was not available.  Just print a blank space
                     # Raise an error so the software knows that the input was bad
                     display_list.append(self.config.data['ascii table'][' '])
                     warnings.formatwarning = custom_format_warning
@@ -457,7 +650,9 @@ class Create2(object):
         
     
         
-  #NOTE ABOUT SONGS: For some reason you cannot play a new song immediately after playing a different one, only the first song will play. You have to time.sleep() at least a fraction of a second for the speaker to process    
+  #NOTE ABOUT SONGS: For some reason you cannot play a new song immediately
+  #after playing a different one, only the first song will play.  You have to
+  #time.sleep() at least a fraction of a second for the speaker to process
     def song(self):
         """Not implementing this for now.
         """
@@ -506,7 +701,7 @@ class Create2(object):
         noError = True
         
         #the length of the song is the length of the array divided by 2
-        song_setup = [song_number,len(play_list)/2]
+        song_setup = [song_number,len(play_list) / 2]
         play_list = [song_setup + play_list]
         play_list = [val for sublist in play_list for val in sublist]
 
@@ -529,7 +724,7 @@ class Create2(object):
         """Plays a single note by creating a 1 note song in song 0
         """
         current_song = 0
-        play_list=[]
+        play_list = []
         noError = True
         if noError:
             #Need to map ascii to numbers from the dict.
@@ -538,7 +733,7 @@ class Create2(object):
                 play_list.append(self.config.data['midi table'][note_name])
                 play_list.append(note_duration)
             else:
-                # That note doesn't exist. Plays nothing
+                # That note doesn't exist.  Plays nothing
                 # Raise an error so the software knows that the input was bad
                 play_list.append(self.config.data['midi table'][0])
                 warnings.formatwarning = custom_format_warning
@@ -554,7 +749,7 @@ class Create2(object):
         for example: 'G5,16,G3,16,A#4,30'
         """
         #splits the string of notes and durations into two lists
-        split_list= note_string.split(',')
+        split_list = note_string.split(',')
         note_list = split_list[0::2]
         duration_list = split_list[1::2]
         #creates a list for serial codes
@@ -565,13 +760,13 @@ class Create2(object):
         
         if noError:
             #Need to map midi to numbers from the dict.
-            for i in range (0,len(note_list)):
+            for i in range(0,len(note_list)):
                 #Check that the note is in the list, if it is, add it.
                 if note_list[i] in self.config.data['midi table']:
                     play_list.append(self.config.data['midi table'][note_list[i]])
                     play_list.append(duration_list[i])
                 else:
-                    # Note was not available. Play a rest
+                    # Note was not available.  Play a rest
                     # Raise an error so the software knows that the input was bad
                     play_list.append(self.config.data['midi table']['rest'])
                     play_list.append(duration_list[i])
@@ -655,7 +850,7 @@ class Create2(object):
             
             Returns: False if there was an error, True if the packet successfully came through.
         """
-        packet_id = str(packet_id)
+        packet_id = str(int(packet_id))
         packet_size = None
         packet_byte_data = None
         if packet_id in self.config.data['sensor group packet lengths']:
@@ -665,7 +860,8 @@ class Create2(object):
             self.sensors(packet_id)
             #Read the data
             packet_byte_data = list(self.SCI.Read(packet_size))
-            # Once we have the byte data, we need to decode the packet and save the new sensor state
+            # Once we have the byte data, we need to decode the packet and save the new
+            # sensor state
             self.sensor_state = self.decoder.decode_packet(packet_id, packet_byte_data, self.sensor_state)
             return True
         else:
@@ -673,6 +869,13 @@ class Create2(object):
             raise ROIDataByteError("Invalid packet ID")
             return False
 
+    def get_packet_data(self, packet_type):
+        """ Returns the value stored in the sensor value dictionary of the requested type
+
+        Arguments:
+                packet_type: The packet type you wish to collect.
+        """
+        return self.sensor_state[str(packet_type)]
 
 
 class sensorPacketDecoder(object):
@@ -706,7 +909,7 @@ class sensorPacketDecoder(object):
         # Other packets (7-58) are single packets, but some of them have two byte
         #   data, and also need special treatment.
         
-        # Hold onto your hats. This is gonna get long fast.
+        # Hold onto your hats.  This is gonna get long fast.
         if id == 0:
             # Size 26, contains packet 7-26
             # We decode the data in reverse order to make pop() simpler
@@ -1694,6 +1897,3 @@ class sensorPacketDecoder(object):
             Returns: An unsigned int
         """
         return struct.unpack('B', byte)[0]
-    
-
-
