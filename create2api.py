@@ -274,10 +274,11 @@ class SerialCommandInterface(object):
     
     """
 
-    def __init__(self):
+    def __init__(self, com, baud):
         self.ser = serial.Serial()
+        self.setup(com, baud)
     
-    def setup(self, com = '/dev/ttyUSB0', baud = 115200):
+    def setup(self, com, baud):
         ''' reconfigure the serial to the passed in settings '''
         self.ser.port = com
         self.ser.baudrate = baud
@@ -331,10 +332,9 @@ class Create2(object):
         This is the only class that outside scripts should be interacting with.    
     """
     
-    def __init__(self):
+    def __init__(self, com = '/dev/ttyUSB0', baud = 115200):
         
-        self.SCI = SerialCommandInterface()
-        self.SCI.setup()
+        self.SCI = SerialCommandInterface(com, baud)
         self.config = Config()
         self.config.load()
         self.decoder = sensorPacketDecoder(dict(self.config.data['sensor group packet lengths']))
