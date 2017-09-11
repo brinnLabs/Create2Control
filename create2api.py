@@ -376,6 +376,7 @@ class Create2(object):
             }
         if baudRate in baud_dict:
             self.SCI.send(self.config.data['opcodes']['baud'], tuple(baud_dict[baudRate]))
+            self.SCI.setup(self.SCI.ser.port, baudRate) #we should reconfigure the serial port to communicate at the specified baud
         else:
             raise ROIDataByteError("Invalid buad rate")
     
