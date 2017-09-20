@@ -62,18 +62,18 @@ bot.destroy()
 - Motors PWM
 - Digit LED ASCII
 - Sensors
+- LED
+- Song
+- Play
 
 ##Unimplemented OI codes
 - Schedule
 - Drive Direct
 - Drive PWM
 - Motors
-- LED
 - Scheduling LED
 - Digit LED Raw
 - Buttons
-- Song
-- Play
 - Query List
 - Stream
 - Pause/Resume Stream
