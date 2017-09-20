@@ -30,7 +30,67 @@ import struct
 import os
 import warnings
 import time
-from enum import IntEnum
+import collections
+from sys import version_info
+from enum import Enum, IntEnum
+
+try:
+    basestring
+except NameError:
+    basestring = str  # compatibility for Python 3
+
+class DriveDirection(Enum):
+    STRAIGHT = '32767'
+    CW = '-1'
+    CCW = '1'
+
+class RequestType(Enum):
+    START = 'srt'
+    RESET = 'rst'
+    STOP = 'stp'
+    BAUD = 'bud'
+    SAFE = 'saf'
+    FULL = 'ful'
+    CLEAN = 'cln'
+    MAX = 'max'
+    SPOT = 'spt'
+    DOCK = 'dck'
+    POWER = 'pow'
+    TIME = 'tme'
+    DRIVE = 'drv'
+    MOTORS = 'mtr'
+    DIGIT_LED = 'led'
+    REQUEST_PACKET = 'rpt'
+    REQUEST_PACKET_DATA = 'rpd'
+    GET_STORED_PACKET_DATA = 'gpd'
+    QUEUE_START = 'qsrt'
+    QUEUE_RESET = 'qrst'
+    QUEUE_STOP = 'qstp'
+    QUEUE_BAUD = 'qbud'
+    QUEUE_SAFE = 'qsaf'
+    QUEUE_FULL = 'qful'
+    QUEUE_CLEAN = 'qcln'
+    QUEUE_MAX = 'qmax'
+    QUEUE_SPOT = 'qspt'
+    QUEUE_DOCK = 'qdck'
+    QUEUE_POWER = 'qpow'
+    QUEUE_TIME = 'qtme'
+    QUEUE_DRIVE = 'qdrv'
+    QUEUE_MOTORS = 'qmtr'
+    QUEUE_DIGIT_LED = 'qled'
+    QUEUE_REQUEST_PACKET = 'qrpt'
+    QUEUE_REQUEST_PACKET_DATA = 'qrpd'
+    QUEUE_GET_STORED_PACKET_DATA = 'qgpd'
+    WAIT = 'wait' #wait can only be queued
+
+def make_command_string(*vals):
+    return ",".join(map(str, flatten(vals)))
+
+def flatten(vals):
+    for val in vals:
+        if isinstance(val, collections.Iterable) and not isinstance(val, basestring):
+            for innerVal in flatten(val): yield innerVal
+        else: yield val
 
 class PacketType(IntEnum):
     GROUP_0 = 0
@@ -843,7 +903,7 @@ class Create2(object):
         """
         self.drive(velocity, 1)
     
-    def get_packet(self, packet_id):
+    def request_packet(self, packet_id):
         """ Requests and reads a packet from the Create 2
             
             Arguments:
@@ -870,14 +930,20 @@ class Create2(object):
             raise ROIDataByteError("Invalid packet ID")
             return False
 
-    def get_packet_data(self, packet_type):
+    def request_packet_data(self, packet_id):
+        request_packet(packet_id)
+        if(isinstance(packet_id, Int)):
+            return get_stored_packet_data(PacketType(packet_id))
+        else:
+            return get_stored_packet_data(packet_id)
+
+    def get_stored_packet_data(self, packet_type):
         """ Returns the value stored in the sensor value dictionary of the requested type
 
         Arguments:
                 packet_type: The packet type you wish to collect.
         """
         return self.sensor_state[str(packet_type)]
-
 
 class sensorPacketDecoder(object):
     """ A class that handles sensor packet decoding. 
