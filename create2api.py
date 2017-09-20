@@ -16,14 +16,11 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.	 IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
-
-
 import json
 import serial
 import struct
@@ -35,10 +32,9 @@ from sys import version_info
 from enum import Enum, IntEnum
 
 try:
-	basestring
+    basestring
 except NameError:
-	basestring = str  # compatibility for Python 3
-
+    basestring = str  # compatibility for Python 3
 class DriveDirection(Enum):
 	STRAIGHT = '32767'
 	CW = '-1'
@@ -82,15 +78,14 @@ class RequestType(Enum):
 	QUEUE_REQUEST_PACKET_DATA = 'qrpd'
 	QUEUE_GET_STORED_PACKET_DATA = 'qgpd'
 	WAIT = 'wait' #wait can only be queued
-
 def make_command_string(*vals):
 	return ",".join(map(str, flatten(vals)))
 
 def flatten(vals):
-	for val in vals:
-		if isinstance(val, collections.Iterable) and not isinstance(val, basestring):
-			for innerVal in flatten(val): yield innerVal
-		else: yield val
+    for val in vals:
+        if isinstance(val, collections.Iterable) and not isinstance(val, basestring):
+            for innerVal in flatten(val): yield innerVal
+        else: yield val
 
 class PacketType(IntEnum):
 	GROUP_0 = 0
@@ -101,7 +96,7 @@ class PacketType(IntEnum):
 	GROUP_5 = 5
 	GROUP_6 = 6
 	ROOMBA_STATUS = 3 #battery levels and internal temperature reading
-	EXTENDED_ANALOG_READINGS = 4 #Cliff and wall sensors 
+	EXTENDED_ANALOG_READINGS = 4 #Cliff and wall sensors
 	WHEEL_DROP_BUMPER = 7
 	WALL = 8
 	CLIFF_LEFT = 9
@@ -268,7 +263,6 @@ class Error(Exception):
 def custom_format_warning(message, category, filename, lineno, file = None, line = None):
 	return 'Line ' + str(lineno) + ': ' + str(message) + '\n'
 	#return ' %s:%s: %s:%s' % (filename, lineno, category.__name__, message)
-
 class ROIDataByteError(Error):
 		"""Exception raised for errors in ROI data bytes.
 	
@@ -355,7 +349,7 @@ class SerialCommandInterface(object):
 		bytes = None
 		
 		if data == None:
-			#Sometimes opcodes don't need data.	 Since we can't add
+			#Sometimes opcodes don't need data.  Since we can't add
 			# a None type to a tuple, we have to make this check.
 			bytes = temp_opcode
 		else:
@@ -398,7 +392,7 @@ class Create2(object):
 		self.config = Config()
 		self.config.load()
 		self.decoder = sensorPacketDecoder(dict(self.config.data['sensor group packet lengths']))
-		self.sensor_state = dict(self.config.data['sensor data']) # Load a raw sensor dict.	 None of these values are correct.
+		self.sensor_state = dict(self.config.data['sensor data']) # Load a raw sensor dict.  None of these values are correct.
 		self.sleep_timer = .5
 		
 	
@@ -651,10 +645,27 @@ class Create2(object):
 			raise ROIFailedToSendError("Invalid data, failed to send")
 		
 	
-	def led(self):
-		"""Not implementing this for now.
+	def led(self, led_bits, power_color, power_intensity):
+		"""Home and Spot use green LEDs: 0 = off, 1 = on
+			Check Robot uses an orange LED.
+			Debris uses a blue LED.
+			Power uses a bicolor (red/green) LED. The intensity and color of this LED can be controlled with 8-bit resolution.
+
+			Arguments:
+				led_bits:
+					uses bit flags so or values for multiple lights, 1 = debris, 2 = spot, 4 = dock, 8 = check robot
+				power_color:
+					0 = green, 255 = red. Intermediate values are intermediate colors (orange, yellow, etc).
+				power_intensity:
+					0 = off, 255 = full intensity. Intermediate values are intermediate intensities.
+
 		"""
-		#self.SCI.send(self.config.data['opcodes']['start'],0)
+
+		led_bits &= 15
+		power_color &= 255
+		power_intensity &=255
+
+		self.SCI.send(self.config.data['opcodes']['led'],tuple(led_bits, power_color, power_intensity))
 	
 	def scheduling_led(self):
 		"""Not implementing this for now.
@@ -794,7 +805,7 @@ class Create2(object):
 				play_list.append(self.config.data['midi table'][note_name])
 				play_list.append(note_duration)
 			else:
-				# That note doesn't exist.	Plays nothing
+				# That note doesn't exist.  Plays nothing
 				# Raise an error so the software knows that the input was bad
 				play_list.append(self.config.data['midi table'][0])
 				warnings.formatwarning = custom_format_warning
@@ -976,7 +987,7 @@ class sensorPacketDecoder(object):
 		# Other packets (7-58) are single packets, but some of them have two byte
 		#	data, and also need special treatment.
 		
-		# Hold onto your hats.	This is gonna get long fast.
+		# Hold onto your hats.  This is gonna get long fast.
 		if id == 0:
 			# Size 26, contains packet 7-26
 			# We decode the data in reverse order to make pop() simpler
